@@ -179,7 +179,7 @@ details[open] summary{margin-bottom:8px}
         <section>
           <h3>Furniture</h3>
           <div class="catalog" id="catalog"></div>
-          <div class="muted">Click or drag onto the plan · drag to move · R rotates · Delete removes</div>
+          <div class="muted">Click or drag onto the plan · drag to move · select it and drag ↻ to turn (or R) · Delete removes</div>
         </section>
         <section id="furnReport"></section>
         <section id="winSec"></section>
@@ -281,10 +281,10 @@ let furnReport = null; // per-furniture minutes of sun
 function loadDefaultScene() {
   state.buildings = [];
   state.nextId = 1;
-  // My building: a long, narrow east–west block (72 × 10 m, 6 floors) with 4 entrances A–D
+  // My building: a long, narrow east–west block (72 × 10 m, 3 floors = 9 m) with 4 entrances A–D
   // (west → east). Each entrance: a 1-bedroom apartment on its west side (5.5 m wide),
   // the stairwell (3 m), and a bigger apartment on its east side (9.5 m). I live in B-west.
-  const mine = addBuilding('My building', 18, [[-36,-5],[36,-5],[36,5],[-36,5]]);
+  const mine = addBuilding('My building', 9, [[-36,-5],[36,-5],[36,5],[-36,5]]);
   mine.entrances = []; mine.parts = [];
   'ABCD'.split('').forEach((L, k) => {
     const x0 = -36 + 18 * k;
@@ -304,14 +304,16 @@ function loadDefaultScene() {
   state.apt = makeDemoApt(mine);
   setLocation('Jerusalem');
 }
-// My apartment: entrance B, west side, floor 2. 5.5 × 10 m (55 m²) through-apartment.
+// My apartment: entrance B, west side, top floor (floor 2 of 0–2). 5.5 × 10 m (55 m²) through-apartment.
 // Local frame = world axes (x east = right, y north = top); edges: 0 S, 1 E, 2 N, 3 W.
 //   south-left  : living room → balcony door + balcony (south)
 //   south-right : bedroom, small south window
 //   west, middle: kitchen counter along the west wall, washer in the top-left (NW) corner;
 //                 a thin half-wall separates kitchen from the living room
 //   north-right : bath; the big north window sits between the washer corner and the bath
-//   east        : entrance door from stair B, with a shoes & coats nook between it and the bath
+//   east        : entrance door from stair B (low on the east wall); an entry corridor runs north
+//                 to the bath door (bath faces south), shoes & coats cupboard on the east wall,
+//                 the bath's west wall continues south in front of it
 function makeDemoApt(b) {
   const W = 2.75, D = 5;
   const apt = { buildingId: b.id, floor: 2, pose: { x: -15.25, y: 0, rot: 0 },
@@ -320,25 +322,25 @@ function makeDemoApt(b) {
   wall([-0.25, -D], [-0.25, -1.4]);                                  // living | bedroom
   wall([-0.25, -1.4], [0.0, -1.4]); wall([0.9, -1.4], [W, -1.4]);    // bedroom north wall, door gap 0.0–0.9
   wall([-W, -1.0], [-1.5, -1.0]);                                    // thin half-wall kitchen | living
-  wall([0.75, D], [0.75, 3.7]); wall([0.75, 2.9], [0.75, 2.6]);      // bath west wall, door gap 2.9–3.7
-  wall([0.75, 2.6], [W, 2.6]);                                       // bath south wall (shoe nook below)
+  wall([0.75, D], [0.75, 0.0]);                                      // bath west wall, extended south in front of the shoe cupboard
+  wall([0.75, 2.6], [0.95, 2.6]); wall([1.75, 2.6], [W, 2.6]);       // bath south wall, door gap 0.95–1.75 (bath entered from the south)
   const win = (edge, t0, t1, sill, height) => apt.windows.push({ id: apt.nextId++, edge, t0, t1, sill, height });
   // edge t: 0 (S) → x+W · 2 (N) → W−x
   win(2, 2.3, 4.25, 0.6, 1.8);    // big north window, x −1.5 … 0.45 (between washer corner and bath)
   win(0, 3.5, 4.5, 1.0, 1.1);     // small south bedroom window, x 0.75 … 1.75
   win(0, 0.45, 2.05, 0, 2.2);     // south balcony door from the living room, x −2.3 … −0.7
-  apt.entry = { edge: 1, t0: 5.8, t1: 6.7 };   // front door on the east wall (from stair B), y 0.8 … 1.7
+  apt.entry = { edge: 1, t0: 3.8, t1: 4.7 };   // front door on the east wall (from stair B), y −1.2 … −0.3
   const fx = (name, x0, y0, x1, y1, h, color) => apt.fixtures.push({ id: apt.nextId++, name, x0, y0, x1, y1, h, color });
   fx('Kitchen counter', -2.55, -0.8, -1.95, 2.6, 0.9, '#c9b9a3');
   fx('Washer', -2.55, 4.2, -1.95, 4.8, 0.85, '#e6ebf0');
-  fx('Shoes & coats', 1.1, 2.15, 2.55, 2.55, 1.8, '#a89580');
+  fx('Shoes & coats', 2.15, 0.1, 2.55, 1.9, 1.8, '#a89580');     // against the east wall, between door and bath
   apt.rooms = [
     { kind: 'living', name: 'Living room', x0: -W, x1: -0.25, y0: -D, y1: -1.0 },
     { kind: 'bed', name: 'Bedroom', x0: -0.25, x1: W, y0: -D, y1: -1.4 },
     { kind: 'kitchen', name: 'Kitchen', x0: -W, x1: -1.1, y0: -1.0, y1: D },
     { kind: 'hall', name: 'Dining', x0: -1.1, x1: 0.75, y0: -1.0, y1: D },
     { kind: 'bath', name: 'Bath', x0: 0.75, x1: W, y0: 2.6, y1: D },
-    { kind: 'hall', name: 'Entry', x0: 0.75, x1: W, y0: 0.6, y1: 2.6 },
+    { kind: 'hall', name: 'Entry', x0: 0.75, x1: W, y0: -1.4, y1: 2.6 },
   ];
   apt.balcony = { x0: -2.6, x1: -0.4, y0: -D - 1.6, y1: -D };
   apt.spec = { sqm: 55, rooms: 2, baths: 1, balcony: true, facings: [0, 2] };
@@ -590,7 +592,27 @@ function toLocal(apt, p) {
   const c = Math.cos(apt.pose.rot), s = Math.sin(apt.pose.rot), dx = p[0] - apt.pose.x, dy = p[1] - apt.pose.y;
   return [dx * c + dy * s, -dx * s + dy * c];
 }
-function furnHalf(f) { const d = CATALOG[f.type]; return f.rot % 180 === 0 ? [d.w / 2, d.d / 2] : [d.d / 2, d.w / 2]; }
+// Furniture geometry: centre (x, y) and angle rot (degrees, counter-clockwise) in the apartment
+// frame; width along the piece's own x axis, depth along its y axis (a bed's head is at +y).
+function furnFrame(f) { const d = CATALOG[f.type], a = (f.rot || 0) * D2R; return { hw: d.w / 2, hd: d.d / 2, c: Math.cos(a), s: Math.sin(a) }; }
+function toFurn(f, fr, p) { const dx = p[0] - f.x, dy = p[1] - f.y; return [dx * fr.c + dy * fr.s, -dx * fr.s + dy * fr.c]; }
+function fromFurn(f, fr, q) { return [f.x + q[0] * fr.c - q[1] * fr.s, f.y + q[0] * fr.s + q[1] * fr.c]; }
+function furnCorners(f, pad = 0) {
+  const fr = furnFrame(f), w = fr.hw + pad, h = fr.hd + pad;
+  return [[-w, -h], [w, -h], [w, h], [-w, h]].map(q => fromFurn(f, fr, q));
+}
+// Separating-axis test for two convex polygons; touching does not count as overlap.
+function convexOverlap(A, B) {
+  for (const P of [A, B]) for (let i = 0; i < P.length; i++) {
+    const a = P[i], b = P[(i + 1) % P.length], nx = b[1] - a[1], ny = a[0] - b[0];
+    let a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
+    for (const p of A) { const v = p[0] * nx + p[1] * ny; a0 = Math.min(a0, v); a1 = Math.max(a1, v); }
+    for (const p of B) { const v = p[0] * nx + p[1] * ny; b0 = Math.min(b0, v); b1 = Math.max(b1, v); }
+    const eps = 1e-6 * Math.hypot(nx, ny);
+    if (a1 <= b0 + eps || b1 <= a0 + eps) return false;
+  }
+  return true;
+}
 
 function makeFullFloorApt(b, floor) {
   const c = centroid(b.pts);
@@ -778,12 +800,14 @@ function deriveApt() {
   }
   const walls = apt.walls.map(w => ({ ...w, a: toWorld(apt, w.a), b: toWorld(apt, w.b) }));
   const furn = apt.furniture.map(f => {
-    const [hw, hd] = furnHalf(f), def = CATALOG[f.type];
-    const corners = [[f.x - hw, f.y - hd], [f.x + hw, f.y - hd], [f.x + hw, f.y + hd], [f.x - hw, f.y + hd]].map(p => toWorld(apt, p));
+    const fr = furnFrame(f), def = CATALOG[f.type], hw = fr.hw, hd = fr.hd;
+    const corners = furnCorners(f).map(p => toWorld(apt, p));
     const samples = [];
     for (const i of [0.15, 0.5, 0.85]) for (const j of [0.15, 0.5, 0.85])
-      samples.push(toWorld(apt, [f.x - hw + 2 * hw * i, f.y - hd + 2 * hd * j]));
-    return { ...f, def, hw, hd, corners, samples, centerW: toWorld(apt, [f.x, f.y]) };
+      samples.push(toWorld(apt, fromFurn(f, fr, [-hw + 2 * hw * i, -hd + 2 * hd * j])));
+    const pillow = def.bed ? [[-hw + 0.08, hd - 0.35], [hw - 0.08, hd - 0.35], [hw - 0.08, hd - 0.05], [-hw + 0.08, hd - 0.05]].map(q => toWorld(apt, fromFurn(f, fr, q))) : null;
+    const handle = toWorld(apt, fromFurn(f, fr, [0, hd + 0.55]));
+    return { ...f, def, hw, hd, corners, samples, pillow, handle, centerW: toWorld(apt, [f.x, f.y]) };
   });
   let balcony = null;
   if (apt.balcony) {
@@ -801,27 +825,36 @@ function deriveApt() {
     const e = edges[apt.entry.edge], at = t => [e.a[0] + (e.b[0] - e.a[0]) * t / e.len, e.a[1] + (e.b[1] - e.a[1]) * t / e.len];
     entry = { ...apt.entry, a: at(apt.entry.t0), b: at(apt.entry.t1), nx: e.nx, ny: e.ny };
   }
-  return { apt, mine, floorZ: apt.floor * STOREY_H, outlineW, edges, windows, walls, furn, balcony, rooms, fixtures, entry };
+  const canRotate = [-5, 5].some(d => aptFits({ ...apt, pose: { ...apt.pose, rot: apt.pose.rot + d * D2R } }, mine));
+  return { apt, mine, floorZ: apt.floor * STOREY_H, outlineW, edges, windows, walls, furn, balcony, rooms, fixtures, entry, canRotate };
 }
 
 // Furniture placement rules (all in the apartment's local frame).
 function furnValid(apt, f) {
-  const [hw, hd] = furnHalf(f);
-  const x0 = f.x - hw, x1 = f.x + hw, y0 = f.y - hd, y1 = f.y + hd;
-  const X0 = x0 - EXT_T, X1 = x1 + EXT_T, Y0 = y0 - EXT_T, Y1 = y1 + EXT_T;   // keep clear of outline walls
-  const O = apt.outline;
-  for (const c of [[X0, Y0], [X1, Y0], [X1, Y1], [X0, Y1]]) if (!insideTol(c[0], c[1], O, 1e-6)) return false;
-  for (let i = 0; i < O.length; i++) if (segHitsRect(O[i], O[(i + 1) % O.length], X0, Y0, X1, Y1)) return false;
-  const t = INT_T / 2;
-  for (const w of apt.walls) if (segHitsRect(w.a, w.b, x0 - t, y0 - t, x1 + t, y1 + t)) return false;
-  for (const g of apt.fixtures || [])
-    if (x0 < g.x1 - 1e-6 && x1 > g.x0 + 1e-6 && y0 < g.y1 - 1e-6 && y1 > g.y0 + 1e-6) return false;
-  for (const g of apt.furniture) {
-    if (g.id === f.id) continue;
-    const [gw, gd] = furnHalf(g);
-    if (x0 < g.x + gw - 1e-6 && x1 > g.x - gw + 1e-6 && y0 < g.y + gd - 1e-6 && y1 > g.y - gd + 1e-6) return false;
-  }
+  const fr = furnFrame(f), O = apt.outline;
+  // Segment vs the piece (grown by `pad`), tested in the piece's own frame where it is axis-aligned.
+  const hits = (a, b, pad) => segHitsRect(toFurn(f, fr, a), toFurn(f, fr, b), -fr.hw - pad, -fr.hd - pad, fr.hw + pad, fr.hd + pad);
+  for (const c of furnCorners(f, EXT_T)) if (!insideTol(c[0], c[1], O, 1e-6)) return false;   // keep clear of outline walls
+  for (let i = 0; i < O.length; i++) if (hits(O[i], O[(i + 1) % O.length], EXT_T)) return false;
+  for (const w of apt.walls) if (hits(w.a, w.b, INT_T / 2)) return false;
+  const P = furnCorners(f);
+  for (const g of apt.fixtures || []) if (convexOverlap(P, [[g.x0, g.y0], [g.x1, g.y0], [g.x1, g.y1], [g.x0, g.y1]])) return false;
+  for (const g of apt.furniture) if (g.id !== f.id && convexOverlap(P, furnCorners(g))) return false;
   return true;
+}
+// Turn a piece to `rot`; if it no longer fits where it is, slide it to the nearest spot
+// (up to 0.8 m away) where it does. Returns false (and leaves it unchanged) if impossible.
+function tryRotate(apt, f, rot) {
+  const old = { x: f.x, y: f.y, rot: f.rot };
+  f.rot = rot;
+  if (furnValid(apt, f)) return true;
+  for (let r = 0.05; r <= 0.8 + 1e-9; r += 0.05)
+    for (let k = 0; k < 24; k++) {
+      f.x = snapTo(old.x + r * Math.cos(k * Math.PI / 12), 0.05); f.y = snapTo(old.y + r * Math.sin(k * Math.PI / 12), 0.05);
+      if (furnValid(apt, f)) return true;
+    }
+  Object.assign(f, old);
+  return false;
 }
 // Add furniture at the free spot nearest to `nearLocal` (default: apartment centre).
 function placeFurniture(type, nearLocal) {
@@ -1145,15 +1178,7 @@ function drawAptPlan(ctx, f) {
   // Furniture (+ sun patches on their tops)
   for (const fu of AW.furn) {
     polyPath(ctx, fu.corners); ctx.fillStyle = fu.def.color; ctx.fill();
-    if (fu.def.bed) {   // pillow strip at the head end (local +y before rotation)
-      const apt = AW.apt, [hw, hd] = [fu.hw, fu.hd];
-      const head = [[0, 1], [-1, 0], [0, -1], [1, 0]][fu.rot / 90];
-      const across = head[0] ? hd : hw, along = head[0] ? hw : hd;
-      const c = [fu.x + head[0] * (along - 0.2), fu.y + head[1] * (along - 0.2)];
-      const ex = head[0] ? [0.15, across - 0.08] : [across - 0.08, 0.15];
-      polyPath(ctx, [[c[0] - ex[0], c[1] - ex[1]], [c[0] + ex[0], c[1] - ex[1]], [c[0] + ex[0], c[1] + ex[1]], [c[0] - ex[0], c[1] + ex[1]]].map(p => toWorld(apt, p)));
-      ctx.fillStyle = '#f6efe4'; ctx.fill();
-    }
+    if (fu.pillow) { polyPath(ctx, fu.pillow); ctx.fillStyle = '#f6efe4'; ctx.fill(); }   // head end
     drawPatches(ctx, fu.def.h, fu.corners, '#ffe066', 0.85);
     const sel = state.aptSel && state.aptSel.kind === 'furn' && state.aptSel.id === fu.id;
     polyPath(ctx, fu.corners);
@@ -1162,6 +1187,16 @@ function drawAptPlan(ctx, f) {
     ctx.font = `600 10px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = '#2a1d10';
     if (Math.min(fu.hw, fu.hd) * 2 * pv.s > 14) ctx.fillText(fu.def.name, cx, cy);
+    if (state.mode === 'move' && !walk.active) {   // rotate handle on every piece (bigger on the selected one)
+      const [hx, hy] = w2s(...fu.handle), r = sel ? 10 : 8;
+      ctx.strokeStyle = '#ffb648'; ctx.lineWidth = sel ? 2 : 1.5;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(hx, hy); ctx.stroke();
+      ctx.beginPath(); ctx.arc(hx, hy, r, 0, 7); ctx.fillStyle = '#ffb648'; ctx.fill();
+      ctx.lineWidth = 1.5; ctx.strokeStyle = '#20160a'; ctx.stroke();
+      ctx.fillStyle = '#20160a'; ctx.font = `700 ${sel ? 13 : 11}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('↻', hx, hy + 1);
+      if (sel) labelBox(ctx, `${Math.round(((fu.rot % 360) + 360) % 360)}°`, hx, hy - 20, '#e7eaf0');
+    }
   }
   // Room names on top of furniture/fittings
   ctx.font = `600 11px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -1208,8 +1243,8 @@ function drawAptPlan(ctx, f) {
     ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.fillStyle = '#ff6b2a'; ctx.fill();
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
   }
-  // Rotate handle
-  if (state.mode === 'move' && !walk.active) {
+  // Apartment rotate handle — only when the apartment can actually turn inside the building
+  if (state.mode === 'move' && !walk.active && AW.canRotate) {
     const hp = handleWorld(), [hx, hy] = w2s(...hp), [px, py] = w2s(AW.apt.pose.x, AW.apt.pose.y);
     ctx.strokeStyle = '#ffb648'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
     ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(hx, hy); ctx.stroke(); ctx.setLineDash([]);
@@ -1355,6 +1390,11 @@ function init3D() {
 
   const hemi = new THREE.HemisphereLight(0xbdd5ff, 0x8f7f66, 0.45);
   scene.add(hemi);
+  // Interior fill for walk-through only (stands in for light bouncing off walls, which the
+  // renderer does not simulate). No shadows, so direct-sun patches are unchanged.
+  const walkFill = new THREE.AmbientLight(0xfff1e0, 0);
+  scene.add(walkFill);
+  T.walkFill = walkFill;
   const sunLight = new THREE.DirectionalLight(0xfff0d0, 1.2);
   sunLight.castShadow = true;
   const ms = Math.min(4096, renderer.capabilities.maxTextureSize);
@@ -1494,7 +1534,7 @@ function buildCutaway(b) {
   for (const f of AW.furn) {
     const m = addMesh(new THREE.BoxGeometry(2 * f.hw, f.def.h, 2 * f.hd), T.furnMats[f.type]);
     m.position.set(f.centerW[0], z0 + 0.02 + f.def.h / 2, -f.centerW[1]);
-    m.rotation.y = AW.apt.pose.rot;
+    m.rotation.y = AW.apt.pose.rot + (f.rot || 0) * D2R;
   }
   for (const x of AW.fixtures) {
     const m = addMesh(new THREE.BoxGeometry(x.x1 - x.x0, x.h, x.y1 - x.y0), mk3(x.color));
@@ -1547,6 +1587,7 @@ function applySun3D(s) {
   T.sunLight.intensity = 0.95 * Math.max(1, boost) * smoothstep(-0.5, 3, elDeg);
   T.sunLight.color = mixColor(0xff9a40, 0xfff3e0, smoothstep(0, 35, elDeg));
   T.hemi.intensity = 0.07 + 0.33 * f;
+  T.walkFill.intensity = walk.active ? 0.18 + 0.2 * f : 0;   // brighter inside when walking (also some lamp light at night)
   const warm = f * (1 - smoothstep(3, 20, elDeg));
   T.scene.background = mixColor(0x0b1020, 0x9ec3e3, f).lerp(new THREE.Color(0xf0a868), warm * 0.55);
   T.sunMesh.visible = elDeg > -1;
@@ -1745,7 +1786,7 @@ const HINTS = {
   select: 'Click a building to select it · drag to pan · scroll to zoom · Delete removes the selected building · drag the compass to rotate north',
   draw: 'Click to place corners (0.5 m grid) · click the first corner or press Enter to close · Backspace: undo · Esc: cancel',
   calib: 'Calibrate: click two points on the map whose real distance you know',
-  move: 'Drag furniture · R rotates · Delete removes · drag the floor to move the apartment, ↻ to rotate it',
+  move: 'Drag furniture · drag its ↻ to turn it (Shift: 5°) · R = 90°, Shift+R = 15° · Delete removes · drag the floor to move the apartment, ↻ to rotate it',
   wall: 'Click to place wall corners (0.5 m grid, chains) · Esc or right-click ends the wall · click a wall in ✥ Move to select/delete',
   window: 'Click two points on an apartment wall to add a window · Esc cancels',
 };
@@ -1807,13 +1848,12 @@ function deleteAptSel() {
   state.aptSel = null;
   aptChanged(true);
 }
-function rotateSelFurniture() {
+function rotateSelFurniture(step = 90) {
   const s = state.aptSel;
   if (!s || s.kind !== 'furn') return;
   const f = state.apt.furniture.find(o => o.id === s.id);
-  const old = f.rot;
-  f.rot = (f.rot + 90) % 360;
-  if (!furnValid(state.apt, f)) { f.rot = old; flashHint('No room to rotate it here.'); return; }
+  const old = f.rot || 0;
+  if (!tryRotate(state.apt, f, (((old + step) % 360) + 360) % 360)) { flashHint('No room to turn it here.'); return; }
   aptChanged(false);
 }
 function finishCalibration() {
@@ -1890,11 +1930,17 @@ function initPlanInput() {
     }
     // move tool
     const [hx, hy] = w2s(...handleWorld());
-    if (Math.hypot(px - hx, py - hy) < 12) { drag = { kind: 'aptRot' }; return; }
+    if (AW.canRotate && Math.hypot(px - hx, py - hy) < 12) { drag = { kind: 'aptRot' }; return; }
     const l = toLocal(apt, wpt);
+    // Furniture rotate handles (selected piece first, then the others)
+    const selId = state.aptSel && state.aptSel.kind === 'furn' ? state.aptSel.id : null;
+    for (const f of [...AW.furn].sort((a, b) => (b.id === selId) - (a.id === selId))) {
+      const [fx, fy] = w2s(...f.handle);
+      if (Math.hypot(px - fx, py - fy) < 12) { state.aptSel = { kind: 'furn', id: f.id }; drag = { kind: 'furnRot', id: f.id }; dirty.plan = true; return; }
+    }
     for (let i = AW.furn.length - 1; i >= 0; i--) {
-      const f = AW.furn[i];
-      if (Math.abs(l[0] - f.x) <= f.hw && Math.abs(l[1] - f.y) <= f.hd) {
+      const f = AW.furn[i], q = toFurn(f, furnFrame(f), l);
+      if (Math.abs(q[0]) <= f.hw && Math.abs(q[1]) <= f.hd) {
         state.aptSel = { kind: 'furn', id: f.id };
         drag = { kind: 'furn', id: f.id, ox: f.x - l[0], oy: f.y - l[1] };
         dirty.plan = true; return;
@@ -1937,6 +1983,15 @@ function initPlanInput() {
         if (furnValid(apt, f)) { if (x !== ox || y !== oy) aptChanged(false); return; }
       }
       f.x = ox; f.y = oy;
+      return;
+    }
+    if (drag.kind === 'furnRot') {   // free rotation in 15° steps (Shift: 5°)
+      const f = apt.furniture.find(o => o.id === drag.id);
+      if (!f) return;
+      const l = toLocal(apt, wpt), step = e.shiftKey ? 5 : 15;
+      const rot = ((snapTo(Math.atan2(-(l[0] - f.x), l[1] - f.y) * R2D, step) % 360) + 360) % 360;
+      if (rot === f.rot) return;
+      if (tryRotate(apt, f, rot)) aptChanged(false);
       return;
     }
     if (drag.kind === 'aptMove' || drag.kind === 'aptRot') {
@@ -1996,7 +2051,7 @@ function initPlanInput() {
       } else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelected(); }
     } else {
       if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteAptSel(); }
-      else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); rotateSelFurniture(); }
+      else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); rotateSelFurniture(e.shiftKey ? 15 : 90); }
     }
   });
 }
@@ -2024,9 +2079,10 @@ function renderInspector() {
   el.innerHTML = `
     <h3>Selected building</h3>
     <div class="insp-title"><span class="swatch" style="background:${mine ? '#3f8cff' : '#8e97a6'}"></span>${escapeHtml(b.name)}${mine ? ' · mine' : ''}</div>
-    <div class="insp-row"><label for="hgt">Height</label>
-      <input id="hgt" type="number" min="1" max="400" step="0.5" value="${b.height}"> <span class="muted">m</span>
-      <span class="muted" id="floors">≈ ${floorsOf(b)} floors</span></div>
+    <div class="insp-row"><label for="bFloors">Floors</label>
+      <input id="bFloors" class="sm" type="number" min="1" max="130" step="1" value="${floorsOf(b)}">
+      <label for="hgt">Height</label>
+      <input id="hgt" class="sm" type="number" min="1" max="400" step="0.5" value="${b.height}" style="width:58px"> <span class="muted">m</span></div>
     <div class="btns">
       <button id="btnMine" ${mine ? 'disabled' : ''}>${mine ? '★ My building' : '★ Mark as mine'}</button>
       <button id="btnDel" class="danger">Delete</button>
@@ -2036,10 +2092,19 @@ function renderInspector() {
     const v = parseFloat(e.target.value);
     if (!(v > 0)) return;
     b.height = Math.min(400, v);
-    $('floors').textContent = `≈ ${floorsOf(b)} floors`;
+    $('bFloors').value = floorsOf(b);
     dirty.scene = true;
     if (b.id === state.mineId) dirty.aptPanel = true;
   });
+  $('bFloors').addEventListener('input', e => {
+    const n = parseInt(e.target.value);
+    if (!(n >= 1)) return;
+    b.height = Math.min(130, n) * STOREY_H;
+    $('hgt').value = b.height;
+    dirty.scene = true;
+    if (b.id === state.mineId) dirty.aptPanel = true;
+  });
+  $('bFloors').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
   $('hgt').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
   $('btnMine').onclick = () => { state.mineId = b.id; dirty.scene = dirty.inspector = dirty.aptPanel = true; };
   $('btnDel').onclick = deleteSelected;
@@ -2072,15 +2137,27 @@ function renderAptPanel() {
   }
   const apt = AW.apt, mine = AW.mine, nF = floorsOf(mine);
   const opts = Array.from({ length: nF }, (_, i) =>
-    `<option value="${i}" ${i === apt.floor ? 'selected' : ''}>${i === 0 ? 'Ground floor' : 'Floor ' + i} · ${i * STOREY_H}–${(i + 1) * STOREY_H} m</option>`).join('');
+    `<option value="${i}" ${i === apt.floor ? 'selected' : ''}>${i === 0 ? 'Ground floor' : 'Floor ' + i}${i === nF - 1 && nF > 1 ? ' (top)' : ''} · ${i * STOREY_H}–${(i + 1) * STOREY_H} m</option>`).join('');
   $('aptSec').innerHTML = `
     <h3>Apartment</h3>
-    <div class="insp-row"><label for="aptFloor">Floor</label><select id="aptFloor" style="flex:1">${opts}</select></div>
+    <div class="insp-row"><label for="aptFloors">Building floors</label>
+      <input id="aptFloors" class="sm" type="number" min="1" max="130" step="1" value="${nF}"></div>
+    <div class="insp-row"><label for="aptFloor">My floor</label><select id="aptFloor" style="flex:1">${opts}</select></div>
     <div class="insp-row" style="margin-bottom:2px"><label for="aptOrient">Orientation</label>
       <input id="aptOrient" type="range" min="0" max="359" step="1" style="flex:1"><button id="oMinus" class="x">−</button><button id="oPlus" class="x">+</button></div>
     <div class="muted" id="orientTxt" style="margin-bottom:6px"></div>
     <div class="muted">${fmtNum(Math.abs(signedArea(apt.outline)))} m² · ${apt.windows.length} window${apt.windows.length === 1 ? '' : 's'} · ${apt.walls.length} interior wall${apt.walls.length === 1 ? '' : 's'}</div>`;
   $('aptFloor').onchange = e => { apt.floor = +e.target.value; aptChanged(true); focusCamera(); };
+  $('aptFloors').addEventListener('change', e => {   // 'change' so typing isn't interrupted by the panel re-render
+    const n = parseInt(e.target.value);
+    if (!(n >= 1)) { e.target.value = nF; return; }
+    const wasTop = apt.floor === nF - 1;
+    mine.height = Math.min(130, n) * STOREY_H;
+    if (wasTop) apt.floor = Math.min(130, n) - 1;      // stay on the top floor if that's where we were
+    apt.floor = Math.min(apt.floor, Math.min(130, n) - 1);
+    dirty.scene = dirty.inspector = true; aptChanged(true); focusCamera();
+  });
+  $('aptFloors').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
   // Orientation: "my big window faces X°". Rotates the compass for the whole scene (same as North).
   const ref = orientRef(), facing = () => Math.round(trueBearing(ref.planBearing)) % 360;
   const showOrient = () => {
