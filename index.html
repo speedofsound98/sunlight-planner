@@ -187,6 +187,10 @@ details[open] summary{margin-bottom:8px}
       </div>
       <section>
         <h3>Scene</h3>
+        <div class="insp-row"><label for="preset">Preset</label><select id="preset">
+          <option value="example">Example block (A–D)</option>
+          <option value="palmach49">Palmach 49, Jerusalem (OSM)</option>
+        </select></div>
         <div class="btns">
           <button id="save">⬇ Save scene</button>
           <button id="loadBtn">⬆ Load scene</button>
@@ -342,10 +346,18 @@ function makeDemoApt(b) {
     { kind: 'bath', name: 'Bath', x0: 0.75, x1: W, y0: 2.6, y1: D },
     { kind: 'hall', name: 'Entry', x0: 0.75, x1: W, y0: -1.4, y1: 2.6 },
   ];
-  apt.balcony = { x0: -2.6, x1: -0.4, y0: -D - 1.6, y1: -D };
+  apt.balcony = { x0: -2.6, x1: -0.4, y0: -D - 0.8, y1: -D };   // 2.2 m along the wall × 0.8 m out
   apt.spec = { sqm: 55, rooms: 2, baths: 1, balcony: true, facings: [0, 2] };
   return apt;
 }
+// Real-site presets, same format as a saved scene file. Footprints from OpenStreetMap
+// (© OpenStreetMap contributors, ODbL), fetched once via Overpass on 2026-11-11 and baked in here
+// so the app stays offline. Projected to meters around my building's centroid (equirectangular,
+// fine at this scale), north = plan-up. OSM has no heights here: heights are guesses
+// (apartment blocks 12 m, other buildings 9 m, houses 6 m) — set them per building.
+const PRESETS = {
+  palmach49: {"app":"sunlight-planner","version":2,"location":{"city":"Jerusalem","lat":31.76486,"lon":35.20832},"northDeg":0,"mineId":1,"buildings":[{"id":1,"name":"Palmach 49 / Mivtza Kadesh 1","height":12,"pts":[[-11.9,17.4],[-20.0,-4.9],[23.8,-20.8],[29.7,-4.7],[-2.9,7.1],[-0.7,13.3]],"entrances":[{"label":"49","x":-16.6,"y":4.3,"mine":true},{"label":"1","x":-1.3,"y":-11.7,"mine":false}]},{"id":2,"name":"Apartments","height":12,"pts":[[-41.7,59.1],[-48.4,48.1],[-29.5,36.6],[-22.8,47.6]]},{"id":3,"name":"Apartments","height":12,"pts":[[-1.9,105.5],[7.6,100.5],[-1.6,83.2],[-11.1,88.2]]},{"id":4,"name":"Apartments","height":12,"pts":[[-70.8,80.1],[-77.2,68.6],[-60.1,59.1],[-58.2,62.6],[-53.7,60.1],[-49.2,68.1]]},{"id":5,"name":"Building","height":9,"pts":[[-29.2,119.2],[-12.3,110.1],[-24.2,88.3],[-34.8,94.0],[-27.0,108.2],[-33.3,111.7]]},{"id":6,"name":"Apartments","height":12,"pts":[[-26.8,78.0],[-31.3,69.4],[-15.1,60.9],[-10.5,69.5]]},{"id":7,"name":"Building","height":9,"pts":[[-61.5,98.0],[-67.0,87.8],[-46.4,76.7],[-40.9,86.8]]},{"id":8,"name":"Building","height":9,"pts":[[-107.8,0.5],[-99.6,8.1],[-80.5,-12.2],[-76.0,-8.0],[-67.0,-17.5],[-79.6,-29.4]]},{"id":9,"name":"Building","height":9,"pts":[[-123.8,-29.1],[-111.3,-22.6],[-103.4,-37.6],[-115.9,-44.1]]},{"id":10,"name":"Building","height":9,"pts":[[-141.4,-0.4],[-115.6,-4.2],[-113.2,12.0],[-132.9,14.9],[-133.9,8.8],[-139.9,9.6]]},{"id":11,"name":"Building","height":9,"pts":[[-70.9,13.4],[-77.8,4.4],[-61.4,-8.1],[-54.6,0.9]]},{"id":12,"name":"Building","height":9,"pts":[[-132.3,38.2],[-135.6,24.5],[-113.2,19.1],[-109.9,32.8]]},{"id":13,"name":"Building","height":9,"pts":[[-83.6,54.1],[-64.2,44.1],[-67.6,37.5],[-76.3,42.0],[-79.1,36.7],[-89.8,42.2]]},{"id":14,"name":"Building","height":9,"pts":[[-101.0,22.2],[-85.8,7.2],[-72.4,20.7],[-82.2,30.3],[-87.6,24.9],[-93.0,30.3]]},{"id":15,"name":"Building","height":9,"pts":[[-56.0,34.4],[-62.1,24.2],[-43.7,13.3],[-37.6,23.6]]},{"id":16,"name":"Building","height":9,"pts":[[48.7,88.2],[42.8,81.9],[49.2,76.1],[55.0,82.4]]},{"id":17,"name":"Apartments","height":12,"pts":[[43.2,132.5],[56.3,124.4],[46.6,108.7],[55.5,103.1],[63.7,116.4],[73.8,110.1],[65.8,97.2],[61.9,99.5],[57.2,92.1],[34.9,105.8],[37.8,110.3],[31.8,114.0]]},{"id":18,"name":"Building","height":9,"pts":[[30.2,102.0],[42.7,95.7],[36.3,83.4],[23.9,89.7]]},{"id":19,"name":"Apartments","height":12,"pts":[[19.3,83.2],[37.3,73.5],[33.5,66.6],[29.3,68.9],[23.1,57.4],[18.2,60.0],[15.6,55.3],[6.8,60.0]]},{"id":20,"name":"Building","height":9,"pts":[[42.5,54.1],[55.0,34.9],[63.8,40.6],[59.6,47.0],[64.8,50.3],[58.3,60.4],[51.5,56.1],[49.7,58.8]]},{"id":21,"name":"Building","height":9,"pts":[[24.9,45.2],[36.6,52.2],[47.8,33.5],[36.1,26.5]]},{"id":22,"name":"Building","height":9,"pts":[[69.4,32.8],[80.2,25.8],[91.2,42.8],[97.7,38.6],[110.4,58.2],[97.5,66.5],[85.3,47.7],[80.9,50.5]]},{"id":23,"name":"Building","height":9,"pts":[[18.5,26.2],[14.3,11.4],[38.2,4.7],[41.4,16.3],[30.9,19.2],[31.8,22.5]]},{"id":24,"name":"Apartments","height":12,"pts":[[-7.8,26.3],[11.1,41.7],[18.0,33.3],[7.6,24.9],[10.9,20.8],[2.4,13.8]]},{"id":25,"name":"Building","height":9,"pts":[[67.9,72.3],[75.1,80.5],[81.7,74.8],[86.8,80.6],[94.1,74.2],[78.3,56.1],[69.0,64.3],[72.5,68.3]]},{"id":26,"name":"House","height":6,"pts":[[55.7,20.9],[51.5,12.7],[59.3,8.7],[56.2,2.6],[67.1,-3.0],[74.5,11.2]]},{"id":27,"name":"Building","height":9,"pts":[[33.6,-7.7],[30.5,-18.2],[37.4,-20.2],[35.7,-26.2],[48.8,-30.0],[50.9,-23.0],[59.2,-25.4],[61.6,-17.4],[52.9,-14.8],[55.1,-7.2],[42.2,-3.4],[40.4,-9.7]]},{"id":28,"name":"Building","height":9,"pts":[[98.7,-20.7],[105.1,-21.6],[102.8,-37.7],[109.3,-38.6],[108.1,-46.9],[95.2,-45.1]]},{"id":29,"name":"Building","height":9,"pts":[[84.6,-17.3],[97.1,-19.7],[92.9,-41.1],[80.5,-38.7]]},{"id":30,"name":"Building","height":9,"pts":[[101.8,13.2],[109.7,6.7],[112.6,10.3],[115.3,8.0],[118.3,11.6],[122.4,8.2],[127.6,14.6],[122.1,19.1],[124.9,22.5],[120.6,26.0],[125.6,32.0],[120.6,36.1]]},{"id":31,"name":"Apartments","height":12,"pts":[[74.9,-68.0],[86.0,-70.0],[89.8,-48.5],[78.7,-46.6]]},{"id":32,"name":"Building","height":9,"pts":[[66.9,-97.5],[82.0,-100.0],[83.3,-92.6],[74.9,-91.2],[75.8,-86.1],[84.1,-87.5],[86.2,-75.3],[71.1,-72.8]]},{"id":33,"name":"Building","height":9,"pts":[[99.2,-71.6],[116.6,-73.9],[119.4,-51.8],[102.0,-49.6]]},{"id":34,"name":"Building","height":9,"pts":[[107.4,-24.7],[107.9,-35.9],[117.9,-35.5],[117.4,-24.2]]},{"id":35,"name":"Building","height":9,"pts":[[92.6,-4.4],[113.1,-4.8],[113.3,4.2],[92.8,4.7]]},{"id":36,"name":"Apartments","height":12,"pts":[[-5.3,-88.9],[-8.6,-99.0],[38.3,-114.0],[41.6,-103.9]]},{"id":37,"name":"Apartments","height":12,"pts":[[8.5,-35.3],[5.3,-45.1],[51.9,-60.0],[55.1,-50.2]]},{"id":38,"name":"Apartments","height":12,"pts":[[1.4,-61.8],[-1.9,-72.2],[45.3,-87.3],[48.6,-76.9]]},{"id":39,"name":"Building","height":9,"pts":[[-34.4,-65.1],[-18.7,-69.9],[-13.4,-52.7],[-29.1,-47.9]]},{"id":40,"name":"Building","height":9,"pts":[[-61.6,-39.0],[-51.9,-47.7],[-47.3,-42.8],[-41.7,-47.9],[-35.8,-41.5],[-42.5,-35.4],[-38.6,-31.3],[-47.3,-23.4]]},{"id":41,"name":"Building","height":9,"pts":[[-25.7,-24.4],[-31.1,-37.5],[-10.7,-45.9],[-5.3,-32.7]]},{"id":42,"name":"Building","height":9,"pts":[[-77.2,-57.2],[-66.1,-69.3],[-55.5,-59.7],[-66.6,-47.5]]},{"id":43,"name":"חזון יחזקאל","height":9,"pts":[[-44.8,-51.6],[-51.9,-64.2],[-41.4,-69.2],[-38.7,-61.7]]},{"id":44,"name":"Building","height":9,"pts":[[-47.6,-82.9],[-27.6,-89.8],[-22.8,-76.0],[-42.8,-69.1]]},{"id":45,"name":"Building","height":9,"pts":[[-98.8,-61.4],[-84.8,-69.6],[-88.7,-76.2],[-73.2,-85.2],[-78.8,-94.7],[-96.9,-84.2],[-93.3,-78.1],[-104.7,-71.5]]},{"id":46,"name":"Building","height":9,"pts":[[-47.6,-99.9],[-51.0,-110.1],[-35.6,-115.2],[-32.2,-105.0]]},{"id":47,"name":"Building","height":9,"pts":[[-72.4,-105.7],[-59.2,-118.0],[-52.9,-111.3],[-57.2,-107.2],[-50.6,-100.1],[-59.5,-91.9]]}],"underlay":null,"apartment":null},
+};
 function addBuilding(name, height, pts) {
   const b = { id: state.nextId++, name, height, pts: ensureCCW(pts.map(p => [p[0], p[1]])) };
   state.buildings.push(b);
@@ -646,7 +658,7 @@ function localExterior(apt, b) {
      front band  — living room (1.6 share) + bedrooms side by side, each with a window,
      hall (1.1 m) — doors from each bedroom; the living room is open to it,
      back band   — bathrooms at the bedroom end, open kitchen in the rest.
-   Side/back windows only on sides the user asked for. A balcony (1.6 m deep) sits outside
+   Side/back windows only on sides the user asked for. A balcony (0.8 m deep, resizable) sits outside
    the living room; its window becomes a 2.2 m tall balcony door.
    ------------------------------------------------------------------------------------- */
 function fitRect(b, area, req, minW, minD, tols = [0.06, 0.2]) {
@@ -748,7 +760,7 @@ function layoutRooms(apt, ext) {
   apt.rooms = [...rooms, ...baths];
   if (kw > 0.5) apt.rooms.push({ kind: 'kitchen', name: 'Kitchen', x0: kx0, x1: kx1, y0: yB, y1: D });
   const lr = rooms.find(r => r.kind === 'living');
-  apt.balcony = spec.balcony ? { x0: r2(lr.x0 + 0.3), x1: r2(lr.x1 - 0.3), y0: -D - 1.6, y1: -D } : null;
+  apt.balcony = spec.balcony ? { x0: r2(lr.x0 + 0.3), x1: r2(lr.x1 - 0.3), y0: -D - 0.8, y1: -D } : null;
 }
 function aptFits(apt, b) {
   const W = apt.outline.map(p => toWorld(apt, p));
@@ -830,17 +842,40 @@ function deriveApt() {
 }
 
 // Furniture placement rules (all in the apartment's local frame).
-function furnValid(apt, f) {
-  const fr = furnFrame(f), O = apt.outline;
-  // Segment vs the piece (grown by `pad`), tested in the piece's own frame where it is axis-aligned.
-  const hits = (a, b, pad) => segHitsRect(toFurn(f, fr, a), toFurn(f, fr, b), -fr.hw - pad, -fr.hd - pad, fr.hw + pad, fr.hd + pad);
-  for (const c of furnCorners(f, EXT_T)) if (!insideTol(c[0], c[1], O, 1e-6)) return false;   // keep clear of outline walls
+// A "box" is any rectangle in the apartment frame: {x, y, rot (deg), hw, hd}. Furniture and fixed
+// fittings (kitchen counter, washer, cupboards) share the same placement rules.
+const furnBox = f => { const d = CATALOG[f.type]; return { x: f.x, y: f.y, rot: f.rot || 0, hw: d.w / 2, hd: d.d / 2 }; };
+const fixBox = g => ({ x: (g.x0 + g.x1) / 2, y: (g.y0 + g.y1) / 2, rot: 0, hw: (g.x1 - g.x0) / 2, hd: (g.y1 - g.y0) / 2 });
+function boxCorners(b, pad = 0) {
+  const a = b.rot * D2R, fr = { c: Math.cos(a), s: Math.sin(a) }, w = b.hw + pad, h = b.hd + pad;
+  return [[-w, -h], [w, -h], [w, h], [-w, h]].map(q => fromFurn(b, fr, q));
+}
+function boxValid(apt, b, self) {
+  const a = b.rot * D2R, fr = { c: Math.cos(a), s: Math.sin(a) }, O = apt.outline;
+  // Segment vs the box (grown by `pad`), tested in the box's own frame where it is axis-aligned.
+  const hits = (p, q, pad) => segHitsRect(toFurn(b, fr, p), toFurn(b, fr, q), -b.hw - pad, -b.hd - pad, b.hw + pad, b.hd + pad);
+  for (const c of boxCorners(b, EXT_T)) if (!insideTol(c[0], c[1], O, 1e-6)) return false;   // keep clear of outline walls
   for (let i = 0; i < O.length; i++) if (hits(O[i], O[(i + 1) % O.length], EXT_T)) return false;
   for (const w of apt.walls) if (hits(w.a, w.b, INT_T / 2)) return false;
-  const P = furnCorners(f);
-  for (const g of apt.fixtures || []) if (convexOverlap(P, [[g.x0, g.y0], [g.x1, g.y0], [g.x1, g.y1], [g.x0, g.y1]])) return false;
-  for (const g of apt.furniture) if (g.id !== f.id && convexOverlap(P, furnCorners(g))) return false;
+  const P = boxCorners(b);
+  for (const g of apt.fixtures || []) if (!(self.kind === 'fix' && g.id === self.id) && convexOverlap(P, boxCorners(fixBox(g)))) return false;
+  for (const g of apt.furniture) if (!(self.kind === 'furn' && g.id === self.id) && convexOverlap(P, boxCorners(furnBox(g)))) return false;
   return true;
+}
+const furnValid = (apt, f) => boxValid(apt, furnBox(f), { kind: 'furn', id: f.id });
+const fixValid = (apt, g) => boxValid(apt, fixBox(g), { kind: 'fix', id: g.id });
+// Turn a fitting 90° about its centre (swap its sides); nudge up to 0.8 m if needed.
+function rotateFixture(apt, g) {
+  const old = { x0: g.x0, y0: g.y0, x1: g.x1, y1: g.y1 };
+  const cx = (g.x0 + g.x1) / 2, cy = (g.y0 + g.y1) / 2, hw = (g.y1 - g.y0) / 2, hd = (g.x1 - g.x0) / 2;
+  const put = (x, y) => Object.assign(g, { x0: x - hw, x1: x + hw, y0: y - hd, y1: y + hd });
+  for (let r = 0; r <= 0.8 + 1e-9; r += 0.05)
+    for (let k = 0; k < (r ? 24 : 1); k++) {
+      put(snapTo(cx + r * Math.cos(k * Math.PI / 12), 0.05), snapTo(cy + r * Math.sin(k * Math.PI / 12), 0.05));
+      if (fixValid(apt, g)) return true;
+    }
+  Object.assign(g, old);
+  return false;
 }
 // Turn a piece to `rot`; if it no longer fits where it is, slide it to the nearest spot
 // (up to 0.8 m away) where it does. Returns false (and leaves it unchanged) if impossible.
@@ -1161,13 +1196,17 @@ function drawAptPlan(ctx, f) {
     if (state.aptSel && state.aptSel.kind === 'wall' && state.aptSel.id === w.id) {
       ctx.save(); ctx.strokeStyle = '#ffb648'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.beginPath(); ctx.moveTo(...w2s(...w.a)); ctx.lineTo(...w2s(...w.b)); ctx.stroke(); ctx.restore();
+      ctx.fillStyle = '#ffb648';   // endpoint grips
+      for (const p of [w.a, w.b]) { const [ex, ey] = w2s(...p); ctx.beginPath(); ctx.arc(ex, ey, 5, 0, 7); ctx.fill(); }
+      ctx.strokeStyle = '#2a3140';
     }
   }
   ctx.lineCap = 'butt';
   // Fixed fittings (kitchen counter, washer, cupboards)
   for (const x of AW.fixtures) {
+    const selFx = state.aptSel && state.aptSel.kind === 'fix' && state.aptSel.id === x.id;
     polyPath(ctx, x.corners); ctx.fillStyle = x.color || '#c9b9a3'; ctx.fill();
-    ctx.lineWidth = 1; ctx.strokeStyle = '#5a4a38'; ctx.stroke();
+    ctx.lineWidth = selFx ? 3 : 1; ctx.strokeStyle = selFx ? '#ffb648' : '#5a4a38'; ctx.stroke();
     const [cx, cy] = w2s(...x.centerW);
     ctx.save(); ctx.translate(cx, cy);
     const ww = (x.x1 - x.x0) * pv.s, hh = (x.y1 - x.y0) * pv.s;
@@ -1709,6 +1748,7 @@ function initUI() {
   window.addEventListener('blur', () => { walk.keys.clear(); walk.run = false; });
   $('loadBtn').onclick = () => $('loadFile').click();
   $('loadFile').addEventListener('change', loadScene);
+  $('preset').addEventListener('change', e => loadPreset(e.target.value));
   $('ulLoad').onclick = () => $('ulFile').click();
   $('ulFile').addEventListener('change', loadUnderlay);
   $('ulCalib').onclick = () => setMode('calib');
@@ -1786,7 +1826,7 @@ const HINTS = {
   select: 'Click a building to select it · drag to pan · scroll to zoom · Delete removes the selected building · drag the compass to rotate north',
   draw: 'Click to place corners (0.5 m grid) · click the first corner or press Enter to close · Backspace: undo · Esc: cancel',
   calib: 'Calibrate: click two points on the map whose real distance you know',
-  move: 'Drag furniture · drag its ↻ to turn it (Shift: 5°) · R = 90°, Shift+R = 15° · Delete removes · drag the floor to move the apartment, ↻ to rotate it',
+  move: 'Drag furniture, fittings, walls (or a wall’s end) and the balcony · ↻ turns furniture (Shift: 5°) · R = 90° · Delete removes · drag the floor to move the apartment, ↻ to rotate it',
   wall: 'Click to place wall corners (0.5 m grid, chains) · Esc or right-click ends the wall · click a wall in ✥ Move to select/delete',
   window: 'Click two points on an apartment wall to add a window · Esc cancels',
 };
@@ -1843,13 +1883,18 @@ function addFurniture(type, nearLocal) {
 function deleteAptSel() {
   const s = state.aptSel, apt = state.apt;
   if (!s || !apt) return;
-  const key = { furn: 'furniture', wall: 'walls', win: 'windows' }[s.kind];
+  const key = { furn: 'furniture', wall: 'walls', win: 'windows', fix: 'fixtures' }[s.kind];
   apt[key] = apt[key].filter(o => o.id !== s.id);
   state.aptSel = null;
   aptChanged(true);
 }
 function rotateSelFurniture(step = 90) {
   const s = state.aptSel;
+  if (s && s.kind === 'fix') {
+    const g = state.apt.fixtures.find(o => o.id === s.id);
+    if (g && rotateFixture(state.apt, g)) aptChanged(false); else flashHint('No room to turn it here.');
+    return;
+  }
   if (!s || s.kind !== 'furn') return;
   const f = state.apt.furniture.find(o => o.id === s.id);
   const old = f.rot || 0;
@@ -1946,11 +1991,32 @@ function initPlanInput() {
         dirty.plan = true; return;
       }
     }
+    for (let i = AW.fixtures.length - 1; i >= 0; i--) {
+      const g = AW.fixtures[i];
+      if (l[0] >= g.x0 && l[0] <= g.x1 && l[1] >= g.y0 && l[1] <= g.y1) {
+        state.aptSel = { kind: 'fix', id: g.id };
+        drag = { kind: 'fix', id: g.id, ox: (g.x0 + g.x1) / 2 - l[0], oy: (g.y0 + g.y1) / 2 - l[1] };
+        dirty.plan = true; return;
+      }
+    }
     const near = (a, b) => distToSeg(px, py, w2s(...a), w2s(...b)) < 7;
     const win = AW.windows.find(w => near(w.a, w.b));
     if (win) { state.aptSel = { kind: 'win', id: win.id }; dirty.plan = true; return; }
+    for (const w of AW.walls) for (const end of ['a', 'b']) {   // drag a wall end
+      const [ex, ey] = w2s(...w[end]);
+      if (Math.hypot(px - ex, py - ey) < 9) { state.aptSel = { kind: 'wall', id: w.id }; drag = { kind: 'wallEnd', id: w.id, end }; dirty.plan = true; return; }
+    }
     const wall = AW.walls.find(w => near(w.a, w.b));
-    if (wall) { state.aptSel = { kind: 'wall', id: wall.id }; dirty.plan = true; return; }
+    if (wall) {   // drag the whole wall
+      const lw = apt.walls.find(o => o.id === wall.id);
+      state.aptSel = { kind: 'wall', id: wall.id };
+      drag = { kind: 'wall', id: wall.id, start: l, a0: lw.a.slice(), b0: lw.b.slice() };
+      dirty.plan = true; return;
+    }
+    const B = apt.balcony;
+    if (B && l[0] >= Math.min(B.x0, B.x1) && l[0] <= Math.max(B.x0, B.x1) && l[1] >= Math.min(B.y0, B.y1) && l[1] <= Math.max(B.y0, B.y1)) {
+      state.aptSel = null; drag = { kind: 'balcony', start: l, x0: B.x0, x1: B.x1 }; dirty.plan = true; return;
+    }
     state.aptSel = null; dirty.plan = true;
     if (pointInPoly(wpt[0], wpt[1], AW.outlineW)) { drag = { kind: 'aptMove', ox: apt.pose.x - wpt[0], oy: apt.pose.y - wpt[1] }; return; }
     drag = { kind: 'pan', px, py, moved: false };
@@ -1983,6 +2049,40 @@ function initPlanInput() {
         if (furnValid(apt, f)) { if (x !== ox || y !== oy) aptChanged(false); return; }
       }
       f.x = ox; f.y = oy;
+      return;
+    }
+    if (drag.kind === 'fix') {
+      const g = apt.fixtures.find(o => o.id === drag.id);
+      if (!g) return;
+      const l = toLocal(apt, wpt), tx = snapTo(l[0] + drag.ox, 0.05), ty = snapTo(l[1] + drag.oy, 0.05);
+      const hw = (g.x1 - g.x0) / 2, hd = (g.y1 - g.y0) / 2, cx = (g.x0 + g.x1) / 2, cy = (g.y0 + g.y1) / 2;
+      for (const [x, y] of [[tx, ty], [tx, cy], [cx, ty]]) {   // full move, then slide along walls
+        Object.assign(g, { x0: x - hw, x1: x + hw, y0: y - hd, y1: y + hd });
+        if (fixValid(apt, g)) { if (x !== cx || y !== cy) aptChanged(false); return; }
+      }
+      Object.assign(g, { x0: cx - hw, x1: cx + hw, y0: cy - hd, y1: cy + hd });
+      return;
+    }
+    if (drag.kind === 'wall' || drag.kind === 'wallEnd') {
+      const w = apt.walls.find(o => o.id === drag.id);
+      if (!w) return;
+      const l = toLocal(apt, wpt), ok = p => insideTol(p[0], p[1], apt.outline, 0.05);
+      if (drag.kind === 'wallEnd') {
+        const p = [snapTo(l[0], 0.05), snapTo(l[1], 0.05)], other = drag.end === 'a' ? w.b : w.a;
+        if (ok(p) && Math.hypot(p[0] - other[0], p[1] - other[1]) >= 0.2) { w[drag.end] = p; aptChanged(false); }
+      } else {
+        const dx = snapTo(l[0] - drag.start[0], 0.05), dy = snapTo(l[1] - drag.start[1], 0.05);
+        const a = [drag.a0[0] + dx, drag.a0[1] + dy], b = [drag.b0[0] + dx, drag.b0[1] + dy];
+        if (ok(a) && ok(b)) { w.a = a; w.b = b; aptChanged(false); }
+      }
+      return;
+    }
+    if (drag.kind === 'balcony') {   // slide the balcony along its wall
+      const B = apt.balcony, l = toLocal(apt, wpt);
+      const xs = apt.outline.map(p => p[0]), lo = Math.min(...xs), hi = Math.max(...xs), len = drag.x1 - drag.x0;
+      let x0 = snapTo(drag.x0 + l[0] - drag.start[0], 0.05);
+      x0 = Math.max(lo, Math.min(hi - len, x0));
+      if (x0 !== B.x0) { B.x0 = x0; B.x1 = x0 + len; aptChanged(false); }
       return;
     }
     if (drag.kind === 'furnRot') {   // free rotation in 15° steps (Shift: 5°)
@@ -2146,6 +2246,9 @@ function renderAptPanel() {
     <div class="insp-row" style="margin-bottom:2px"><label for="aptOrient">Orientation</label>
       <input id="aptOrient" type="range" min="0" max="359" step="1" style="flex:1"><button id="oMinus" class="x">−</button><button id="oPlus" class="x">+</button></div>
     <div class="muted" id="orientTxt" style="margin-bottom:6px"></div>
+    <div class="insp-row"><label class="chk"><input id="balOn" type="checkbox" ${apt.balcony ? 'checked' : ''}>Balcony</label>
+      ${apt.balcony ? `<label for="balLen">along wall</label><input id="balLen" class="sm" type="number" step="0.1" min="0.6" value="${fmtNum(apt.balcony.x1 - apt.balcony.x0)}">
+      <label for="balDep">out</label><input id="balDep" class="sm" type="number" step="0.1" min="0.3" max="4" value="${fmtNum(apt.balcony.y1 - apt.balcony.y0)}"><span class="muted">m</span>` : ''}</div>
     <div class="muted">${fmtNum(Math.abs(signedArea(apt.outline)))} m² · ${apt.windows.length} window${apt.windows.length === 1 ? '' : 's'} · ${apt.walls.length} interior wall${apt.walls.length === 1 ? '' : 's'}</div>`;
   $('aptFloor').onchange = e => { apt.floor = +e.target.value; aptChanged(true); focusCamera(); };
   $('aptFloors').addEventListener('change', e => {   // 'change' so typing isn't interrupted by the panel re-render
@@ -2171,6 +2274,33 @@ function renderAptPanel() {
   $('oMinus').onclick = () => setFacing(facing() - 1, true);
   $('oPlus').onclick = () => setFacing(facing() + 1, true);
   showOrient();
+  // Balcony on/off and size (it sits outside the apartment's front wall, local edge 0)
+  const B = apt.balcony;
+  $('balOn').onchange = e => {
+    if (e.target.checked) {
+      const ys = apt.outline.map(p => p[1]), xs = apt.outline.map(p => p[0]), y1 = Math.min(...ys);
+      const lr = (apt.rooms || []).find(r => r.kind === 'living');
+      const x0 = lr ? lr.x0 + 0.3 : (Math.min(...xs) + Math.max(...xs)) / 2 - 1.1, x1 = lr ? lr.x1 - 0.3 : x0 + 2.2;
+      apt.balcony = { x0, x1, y0: y1 - 0.8, y1 };
+    } else apt.balcony = null;
+    aptChanged(true);
+  };
+  if (B) {
+    const xs = apt.outline.map(p => p[0]), lo = Math.min(...xs), hi = Math.max(...xs);
+    $('balLen').addEventListener('input', e => {
+      const v = parseFloat(e.target.value);
+      if (!(v >= 0.6)) return;
+      const len = Math.min(v, hi - lo), c = (B.x0 + B.x1) / 2;
+      B.x0 = Math.max(lo, Math.min(hi - len, c - len / 2)); B.x1 = B.x0 + len;
+      aptChanged(false);
+    });
+    $('balDep').addEventListener('input', e => {
+      const v = parseFloat(e.target.value);
+      if (!(v >= 0.3)) return;
+      B.y0 = B.y1 - Math.min(v, 4);
+      aptChanged(false);
+    });
+  }
 
   // Windows list + add-by-facing
   const rows = AW.windows.map(w => `
@@ -2318,47 +2448,54 @@ function loadScene(e) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
-    try {
-      const d = JSON.parse(reader.result);
-      if (!Array.isArray(d.buildings)) throw new Error('missing "buildings"');
-      const bs = d.buildings.map((b, i) => {
-        const pts = (b.pts || []).map(p => [Number(p[0]), Number(p[1])]);
-        if (pts.length < 3 || pts.some(p => !isFinite(p[0]) || !isFinite(p[1]))) throw new Error(`building ${i + 1} has bad corners`);
-        const h = Number(b.height);
-        if (!(h > 0)) throw new Error(`building ${i + 1} has bad height`);
-        return { id: Number(b.id) || i + 1, name: String(b.name || `Building ${i + 1}`), height: h, pts: ensureCCW(pts),
-                 entrances: Array.isArray(b.entrances) ? b.entrances : undefined, parts: Array.isArray(b.parts) ? b.parts : undefined };
-      });
-      state.buildings = bs;
-      state.nextId = bs.reduce((m, b) => Math.max(m, b.id), 0) + 1;
-      state.mineId = bs.some(b => b.id === d.mineId) ? d.mineId : null;
-      state.selectedId = null;
-      if (d.location && isFinite(d.location.lat) && isFinite(d.location.lon))
-        state.location = { city: String(d.location.city || 'Custom'), lat: +d.location.lat, lon: +d.location.lon };
-      syncLocationUI();
-      if (isFinite(d.day)) setDay(d.day);
-      if (isFinite(d.minutes)) { state.minutes = ((+d.minutes % 1440) + 1440) % 1440; syncTimeUI(); }
-      setNorth(isFinite(d.northDeg) ? +d.northDeg : 0);
-      const a = d.apartment;
-      state.apt = (a && a.pose && Array.isArray(a.outline) && a.buildingId === state.mineId)
-        ? { buildingId: a.buildingId, floor: +a.floor || 0, pose: { x: +a.pose.x, y: +a.pose.y, rot: +a.pose.rot },
-            outline: a.outline, walls: a.walls || [], windows: a.windows || [], furniture: (a.furniture || []).filter(f => CATALOG[f.type]),
-            nextId: +a.nextId || 1000, spec: a.spec || null, rooms: a.rooms || [], balcony: a.balcony || null,
-            fixtures: a.fixtures || [], entry: a.entry || null }
-        : null;
-      state.aptSel = null;
-      state.underlay = null;
-      if (d.underlay && d.underlay.src) setUnderlayFromSrc(d.underlay.src, d.underlay);
-      syncUnderlayUI();
-      views.site.fitted = views.apt.fitted = false;
-      setView(state.mineId ? state.view : 'site');
-      pv = views[state.view]; fitView();
-      Object.keys(dirty).forEach(k => dirty[k] = true);
-    } catch (err) {
-      alert('Could not load scene: ' + err.message);
-    }
+    try { applySceneData(JSON.parse(reader.result)); }
+    catch (err) { alert('Could not load scene: ' + err.message); }
   };
   reader.readAsText(file);
+}
+function loadPreset(key) {
+  if (key === 'example') {
+    loadDefaultScene(); state.aptSel = null; syncUnderlayUI();
+    views.site.fitted = views.apt.fitted = false;
+    pv = views[state.view]; fitView();
+    Object.keys(dirty).forEach(k => dirty[k] = true);
+  } else applySceneData(JSON.parse(JSON.stringify(PRESETS[key])));
+}
+function applySceneData(d) {
+  if (!Array.isArray(d.buildings)) throw new Error('missing "buildings"');
+  const bs = d.buildings.map((b, i) => {
+    const pts = (b.pts || []).map(p => [Number(p[0]), Number(p[1])]);
+    if (pts.length < 3 || pts.some(p => !isFinite(p[0]) || !isFinite(p[1]))) throw new Error(`building ${i + 1} has bad corners`);
+    const h = Number(b.height);
+    if (!(h > 0)) throw new Error(`building ${i + 1} has bad height`);
+    return { id: Number(b.id) || i + 1, name: String(b.name || `Building ${i + 1}`), height: h, pts: ensureCCW(pts),
+             entrances: Array.isArray(b.entrances) ? b.entrances : undefined, parts: Array.isArray(b.parts) ? b.parts : undefined };
+  });
+  state.buildings = bs;
+  state.nextId = bs.reduce((m, b) => Math.max(m, b.id), 0) + 1;
+  state.mineId = bs.some(b => b.id === d.mineId) ? d.mineId : null;
+  state.selectedId = null;
+  if (d.location && isFinite(d.location.lat) && isFinite(d.location.lon))
+    state.location = { city: String(d.location.city || 'Custom'), lat: +d.location.lat, lon: +d.location.lon };
+  syncLocationUI();
+  if (isFinite(d.day)) setDay(d.day);
+  if (isFinite(d.minutes)) { state.minutes = ((+d.minutes % 1440) + 1440) % 1440; syncTimeUI(); }
+  setNorth(isFinite(d.northDeg) ? +d.northDeg : 0);
+  const a = d.apartment;
+  state.apt = (a && a.pose && Array.isArray(a.outline) && a.buildingId === state.mineId)
+    ? { buildingId: a.buildingId, floor: +a.floor || 0, pose: { x: +a.pose.x, y: +a.pose.y, rot: +a.pose.rot },
+        outline: a.outline, walls: a.walls || [], windows: a.windows || [], furniture: (a.furniture || []).filter(f => CATALOG[f.type]),
+        nextId: +a.nextId || 1000, spec: a.spec || null, rooms: a.rooms || [], balcony: a.balcony || null,
+        fixtures: a.fixtures || [], entry: a.entry || null }
+    : null;
+  state.aptSel = null;
+  state.underlay = null;
+  if (d.underlay && d.underlay.src) setUnderlayFromSrc(d.underlay.src, d.underlay);
+  syncUnderlayUI();
+  views.site.fitted = views.apt.fitted = false;
+  setView(state.mineId ? state.view : 'site');
+  pv = views[state.view]; fitView();
+  Object.keys(dirty).forEach(k => dirty[k] = true);
 }
 function loadUnderlay(e) {
   const file = e.target.files[0];
