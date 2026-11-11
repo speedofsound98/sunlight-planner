@@ -12,6 +12,6 @@ Everything runs in the browser from a single `index.html` (Three.js r128 from cd
 - North angle / compass, map-image underlay with two-point scale calibration.
 - Apartment view: floor selector, generator (m², rooms, baths, balcony, window directions), walls, windows, furniture catalog, sun patches, furniture & balcony sun report.
 - Walk-through mode (WASD), best-orientation search, PNG export, JSON save/load.
-- Scene presets: the example block, and Palmach 49, Jerusalem with its real neighborhood footprints from OpenStreetMap (© OpenStreetMap contributors, ODbL; heights are estimates).
+- Scene presets: the example block; Palmach 49, Jerusalem with its real neighborhood footprints from OpenStreetMap (© OpenStreetMap contributors, ODbL; heights are estimates); and a Boca Raton house laid out from the community site plan (not yet in OSM).
 
 The time slider is local solar time (no time zones or DST).
